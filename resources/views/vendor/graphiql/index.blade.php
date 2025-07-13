@@ -1,7 +1,6 @@
-{{-- resources/views/graphiql.blade.php --}}
-{{-- Based on: https://github.com/graphql/graphiql/blob/main/examples/graphiql-cdn/index.html --}}
+{{-- See https://github.com/graphql/graphiql/blob/main/examples/graphiql-cdn/index.html. --}}
 @php
-    use MLL\GraphiQL\GraphiQLAsset;
+use MLL\GraphiQL\GraphiQLAsset;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +11,7 @@
     <style>
         body {
             margin: 0;
-            overflow: hidden;
+            overflow: hidden; /* in Firefox */
         }
 
         #graphiql {
@@ -28,10 +27,10 @@
         }
 
         .docExplorerWrap {
+            /* Allow scrolling, see https://github.com/graphql/graphiql/issues/3098. */
             overflow: auto !important;
         }
     </style>
-
     <script src="{{ GraphiQLAsset::reactJS() }}"></script>
     <script src="{{ GraphiQLAsset::reactDOMJS() }}"></script>
     <link rel="stylesheet" href="{{ GraphiQLAsset::graphiQLCSS() }}"/>
@@ -49,22 +48,18 @@
 <script src="{{ GraphiQLAsset::pluginExplorerJS() }}"></script>
 <script>
     const fetcher = GraphiQL.createFetcher({
-        url: '/', // POST requests go to root
+        url: '{{ $url }}',
+        subscriptionUrl: '{{ $subscriptionUrl }}',
     });
-
     const explorer = GraphiQLPluginExplorer.explorerPlugin();
 
     function GraphiQLWithExplorer() {
         return React.createElement(GraphiQL, {
             fetcher,
-            plugins: [explorer],
-            defaultQuery: `{
-  __schema {
-    queryType {
-      name
-    }
-  }
-}`, // This prevents the "query is missing" error
+            plugins: [
+                explorer,
+            ],
+            // See https://github.com/graphql/graphiql/tree/main/packages/graphiql#props for available settings
         });
     }
 
